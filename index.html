@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
+<meta name="theme-color" content="#05070f" />
+<title>AMONG SUS — Uzay İstasyonunda Bir Hileci Var</title>
+<link rel="stylesheet" href="css/style.css" />
+</head>
+<body>
+
+<canvas id="bg"></canvas>
+<canvas id="game"></canvas>
+
+<div id="ui">
+
+  <!-- ================= MENU ================= -->
+  <section id="menu" class="screen">
+    <div class="menu-grid">
+      <div class="menu-main">
+        <div class="logo-wrap">
+          <div class="chibi logo-chibi" id="logoChibi"><span class="pack"></span><span class="body"></span><span class="visor"></span></div>
+          <h1 class="logo">AMONG<span>SUS</span></h1>
+        </div>
+        <p class="tagline">Uzay istasyonunda bir hileci var.<br />Görevlerini tamamla — ya da herkesi sustur.</p>
+
+        <div class="card menu-card">
+          <div class="field">
+            <label for="nickname">MÜRETTEBAT ADIN</label>
+            <input id="nickname" maxlength="12" value="Mürettebat" autocomplete="off" spellcheck="false" />
+          </div>
+          <div class="field">
+            <label>KARAKTER RENGİ</label>
+            <div id="colorRow" class="color-row"></div>
+          </div>
+          <button id="playBtn" class="btn btn-primary btn-big">
+            <span>OYUNA BAŞLA</span><span class="btn-arrow">▶</span>
+          </button>
+          <button id="howtoBtn" class="btn btn-ghost">NASIL OYNANIR?</button>
+        </div>
+
+        <p class="menu-note"><span class="live-dot"></span> Tek oyunculu · 8 oyuncu · Yapay zekâ mürettebat</p>
+      </div>
+
+      <div class="menu-art" aria-hidden="true">
+        <div class="planet"></div>
+        <div class="orbit"></div>
+        <div class="poster-beans">
+          <div class="chibi pb1" style="--c:#e03a3a"><span class="pack"></span><span class="body"></span><span class="visor"></span><span class="leg l"></span><span class="leg r"></span></div>
+          <div class="chibi pb2" style="--c:#3b6fe0"><span class="pack"></span><span class="body"></span><span class="visor"></span><span class="leg l"></span><span class="leg r"></span></div>
+          <div class="chibi pb3" style="--c:#3fbf5f"><span class="pack"></span><span class="body"></span><span class="visor"></span><span class="leg l"></span><span class="leg r"></span></div>
+        </div>
+        <div class="poster-caption">HİLECİ ARAMIZDA</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= ROLE REVEAL ================= -->
+  <section id="role" class="screen hidden">
+    <div class="role-card">
+      <div class="role-kicker">ROLÜN</div>
+      <div id="roleIcon" class="role-icon chibi"><span class="pack"></span><span class="body"></span><span class="visor"></span></div>
+      <h2 id="roleTitle">MÜRETTEBAT</h2>
+      <p id="roleDesc"></p>
+      <div id="roleTasks" class="role-tasks"></div>
+      <button id="roleStart" class="btn btn-primary btn-big">İSTASYONA GİR</button>
+    </div>
+  </section>
+
+  <!-- ================= HUD ================= -->
+  <div id="hud" class="hidden">
+    <div class="hud-top">
+      <div class="taskcard">
+        <div class="taskcard-head">
+          <span id="roleTag" class="role-chip">MÜRETTEBAT</span>
+          <span id="taskPct" class="task-pct">0%</span>
+        </div>
+        <div class="task-track"><div id="taskFill" class="task-fill"></div></div>
+        <div id="taskList" class="task-list"></div>
+      </div>
+      <div class="hud-buttons">
+        <button id="soundBtn" class="icon-btn" aria-label="Sesi aç/kapat">
+          <svg viewBox="0 0 24 24"><path d="M4 9v6h4l5 4V5L8 9H4Zm12.5 3a4.5 4.5 0 0 0-2.5-4v8a4.5 4.5 0 0 0 2.5-4Z" fill="currentColor"/></svg>
+        </button>
+        <button id="pauseBtn" class="icon-btn" aria-label="Duraklat">
+          <svg viewBox="0 0 24 24"><rect x="6" y="4" width="4" height="16" rx="1.5" fill="currentColor"/><rect x="14" y="4" width="4" height="16" rx="1.5" fill="currentColor"/></svg>
+        </button>
+      </div>
+    </div>
+
+    <div id="prompt" class="prompt hidden"></div>
+
+    <div class="action-bar">
+      <button id="ventBtn" class="action vent hidden" aria-label="Havalandırmaya gir">
+        <span class="action-icon">
+          <svg viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="3.4" rx="1.7" fill="currentColor"/><rect x="3" y="10.3" width="18" height="3.4" rx="1.7" fill="currentColor"/><rect x="3" y="15.6" width="18" height="3.4" rx="1.7" fill="currentColor"/></svg>
+        </span>
+        <span class="action-label">VENT</span>
+        <span class="cd-mask"></span>
+        <span class="cd-num"></span>
+      </button>
+
+      <button id="killBtn" class="action kill hidden" aria-label="Öldür">
+        <span class="action-icon">
+          <svg viewBox="0 0 24 24"><path d="M12 2a8 8 0 0 0-8 8c0 3 1.7 5.4 4 6.5V20a2 2 0 0 0 2 2h4a2 2 0 0 0 2-2v-3.5c2.3-1.1 4-3.5 4-6.5a8 8 0 0 0-8-8Z" fill="currentColor"/><circle cx="9" cy="10" r="1.8" fill="#2a0b12"/><circle cx="15" cy="10" r="1.8" fill="#2a0b12"/><path d="M9.6 15.2h4.8" stroke="#2a0b12" stroke-width="1.6" stroke-linecap="round"/></svg>
+        </span>
+        <span class="action-label">ÖLDÜR</span>
+        <span class="cd-mask"></span>
+        <span class="cd-num"></span>
+      </button>
+
+      <button id="useBtn" class="action use hidden" aria-label="Kullan">
+        <span class="action-icon">
+          <svg viewBox="0 0 24 24"><path d="M13 2 4 14h6l-1 8 9-12h-6l1-8Z" fill="currentColor"/></svg>
+        </span>
+        <span class="action-label" id="useLabel">KULLAN</span>
+      </button>
+    </div>
+
+    <div id="joystick" class="joystick hidden"><div class="joy-ring"></div><div id="joyKnob" class="joy-knob"></div></div>
+    <div id="notify" class="notify hidden"></div>
+  </div>
+
+  <!-- ================= PAUSE ================= -->
+  <div id="pause" class="overlay hidden">
+    <div class="dialog">
+      <div class="dialog-kicker">DURAKLATILDI</div>
+      <h2>NEFES AL</h2>
+      <p>Hileci hâlâ aramızda. Hazır olduğunda devam et.</p>
+      <div class="dialog-buttons">
+        <button id="resumeBtn" class="btn btn-primary">DEVAM ET</button>
+        <button id="pauseRestartBtn" class="btn btn-ghost">YENİDEN BAŞLAT</button>
+        <button id="pauseMenuBtn" class="btn btn-ghost">ANA MENÜ</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ================= MINI GAME ================= -->
+  <div id="minigame" class="overlay hidden">
+    <div class="mg-card">
+      <div class="mg-head">
+        <div>
+          <div class="mg-kicker">GÖREV</div>
+          <h2 id="mgTitle">Kabloları Bağla</h2>
+        </div>
+        <button id="mgClose" class="mg-close" aria-label="Kapat">✕</button>
+      </div>
+      <div id="mgBody" class="mg-body"></div>
+      <p id="mgHint" class="mg-hint"></p>
+    </div>
+  </div>
+
+  <!-- ================= MEETING ================= -->
+  <div id="meeting" class="overlay hidden">
+    <div class="meeting-panel">
+      <div class="meeting-top">
+        <div class="meeting-badge">!</div>
+        <div class="meeting-heading">
+          <h2 id="meetingTitle">CESET BULUNDU</h2>
+          <p id="meetingSub"></p>
+        </div>
+        <div id="meetingTimer" class="meeting-timer">20</div>
+      </div>
+      <div id="meetingChat" class="meeting-chat"></div>
+      <div id="meetingGrid" class="meeting-grid"></div>
+      <div class="meeting-foot">
+        <p class="meeting-hint">Birini seç ya da oyunu atla. Çoğunluk karar verir, beraberlikte kimse atılmaz.</p>
+        <button id="skipVote" class="btn btn-ghost skip-btn">OYU ATLA</button>
+      </div>
+    </div>
+
+    <div id="ejectScene" class="eject-scene hidden">
+      <div id="ejectBean" class="chibi eject-bean"><span class="pack"></span><span class="body"></span><span class="visor"></span></div>
+      <div class="eject-text">
+        <h3 id="ejectTitle">KİMSE ATILMADI</h3>
+        <p id="ejectSub"></p>
+      </div>
+    </div>
+  </div>
+
+  <!-- ================= END ================= -->
+  <div id="end" class="overlay hidden">
+    <div class="end-card">
+      <div id="endEmblem" class="end-emblem">☠</div>
+      <div class="end-kicker">OYUN BİTTİ</div>
+      <h2 id="endTitle">MÜRETTEBAT KAZANDI</h2>
+      <p id="endSub"></p>
+      <div id="endStats" class="end-stats"></div>
+      <div class="end-buttons">
+        <button id="againBtn" class="btn btn-primary">TEKRAR OYNA</button>
+        <button id="endMenuBtn" class="btn btn-ghost">ANA MENÜ</button>
+      </div>
+      <p class="end-credit">AMONG SUS · tarayıcıda oynanan fan yapımı mini oyun</p>
+    </div>
+  </div>
+
+  <!-- ================= HOW TO ================= -->
+  <div id="howto" class="overlay hidden">
+    <div class="howto-card">
+      <button id="howtoClose" class="mg-close" aria-label="Kapat">✕</button>
+      <div class="mg-kicker">BİLGİLENDİRME</div>
+      <h2>NASIL OYNANIR?</h2>
+      <div class="howto-grid">
+        <div class="howto-item"><span class="howto-ico">🎭</span><h3>ROLÜNÜ ÖĞREN</h3><p>8 kişilik istasyonda ya mürettebatsın ya da tek hileci. Rolün oyun başında açıklanır.</p></div>
+        <div class="howto-item"><span class="howto-ico">🔧</span><h3>GÖREVLERİ YAP</h3><p>Sarı elmasları bul, yaklaş ve <b>E</b> ile mini göreve gir. Görev çubuğu %100 olursa mürettebat kazanır.</p></div>
+        <div class="howto-item"><span class="howto-ico">🗡</span><h3>HİLECİYSEN</h3><p>Kimse görmeden mürettebatı öldür. <b>Q</b> ile havalandırmalardan kaç. Cesetleri bildirip masumları suçlayabilirsin.</p></div>
+        <div class="howto-item"><span class="howto-ico">🚨</span><h3>TOPLANTI KUR</h3><p>Ceset bulduğunda <b>E</b> ile bildir ya da kafeteryadaki kırmızı butonla acil toplantı çağır.</p></div>
+        <div class="howto-item"><span class="howto-ico">🗳</span><h3>OY VER</h3><p>Toplantıda şüphelendiğin kişiyi seç. En çok oyu alan atılır. Hileci atılırsa mürettebat kazanır.</p></div>
+        <div class="howto-item"><span class="howto-ico">⚙️</span><h3>KONTROLLER</h3><p><b>WASD / oklar</b> hareket · <b>E</b> kullan/öldür · <b>Q</b> vent · <b>ESC</b> duraklat. Dokunmatikte joystick otomatik çıkar.</p></div>
+      </div>
+      <button id="howtoPlay" class="btn btn-primary">ANLADIM, OYNAYALIM</button>
+    </div>
+  </div>
+
+  <div id="toasts" class="toasts"></div>
+
+
+</div>
+
+<script src="js/audio.js"></script>
+<script src="js/game.js"></script>
+</body>
+</html>
